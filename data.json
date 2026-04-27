@@ -1,0 +1,62 @@
+{
+  "bot": {
+    "welcome_message": "Bienvenue dans la Society 🦅 La loi du silence.",
+    "menu_title": "Choisissez votre accès.",
+    "contact_username": "@votre_contact",
+    "info_text": "🇲🇦 Maroc · 🇨🇴 Colombie · 🇺🇸 USA · 🇳🇱 Hollande\nContact : @votre_contact\nAccès sur invitation uniquement."
+  },
+  "shop": {
+    "title": "OMERTA SOCIETY",
+    "subtitle": "La sélection exclusive — Sur invitation",
+    "currency": "€",
+    "products": [
+      {
+        "id": 1,
+        "name": "GOLD SELECTION",
+        "emoji": "🌿",
+        "description": "Notre sélection premium, cultivée avec soin. Arômes intenses, qualité irréprochable.",
+        "image_url": "",
+        "prices": [
+          { "qty": "5g",  "price": 40 },
+          { "qty": "10g", "price": 75 },
+          { "qty": "20g", "price": 140 },
+          { "qty": "50g", "price": 320 }
+        ],
+        "available": true
+      },
+      {
+        "id": 2,
+        "name": "MOROCCAN HASH",
+        "emoji": "🟫",
+        "description": "Importé directement du Rif marocain. Texture unique, puissance garantie.",
+        "image_url": "",
+        "prices": [
+          { "qty": "5g",  "price": 35 },
+          { "qty": "10g", "price": 65 },
+          { "qty": "25g", "price": 150 },
+          { "qty": "50g", "price": 280 }
+        ],
+        "available": true
+      }
+    ]
+  },
+  "socials": [
+    {
+      "name": "Instagram",
+      "url": "https://instagram.com/omertasociety",
+      "handle": "@omertasociety",
+      "logo_url": "",
+      "emoji": "📸"
+    },
+    {
+      "name": "Telegram",
+      "url": "https://t.me/omertasociety",
+      "handle": "@omertasociety",
+      "logo_url": "",
+      "emoji": "✈️"
+    }
+  ],
+  "admin": {
+    "password": "admin1234"
+  }
+}
