@@ -1,0 +1,960 @@
+let selectedQtyIndex = 0;
+
+function openModal(idx) {
+  const p = shopData.products[idx];
+  currentProduct   = p;
+  selectedQtyIndex = 0;
+
+  document.getElementById('modalName').textContent = p.name;
+  document.getElementById('modalDesc').textContent = p.description;
+  document.getElementById('modalPrices').innerHTML = (p.prices||[]).map((pr,qi) => `
+    <div class="modal-price-item ${qi===0?'selected':''}" onclick="selModalQty(${qi},this)">
+      <span class="m-qty">${pr.qty}</span>
+      <span class="m-price">${pr.price} ${shopData.currency}</span>
+    </div>
+  `).join('');
+
+  document.getElementById('modalOverlay').classList.add('open');
+  if (tg) tg.HapticFeedback?.impactOccurred('light');
+}
+
+function selModalQty(idx, el) {
+  selectedQtyIndex = idx;
+  document.querySelectorAll('.modal-price-item').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function closeModalBg(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModalBtn();
+}
+function closeModalBtn() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function confirmOrder() {
+  if (!currentProduct) return;
+  const pr = currentProduct.prices[selectedQtyIndex];
+  closeModalBtn();
+  showToast(`◆ ${currentProduct.name} — ${pr.qty} — ${pr.price} ${shopData.currency}`);
+  if (tg) tg.HapticFeedback?.notificationOccurred('success');
+}
+
+/* ════════════════════════════════════════════════
+   TOAST
+════════════════════════════════════════════════ */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+loadData();
+</script>
+
+</body>
+</html>
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <title>OMERTA ADMIN</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Bebas+Neue&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+  :root {
+    --bg:      #060e07;
+    --surface: #0d1a0f;
+    --card:    #111f13;
+    --deep:    #080f09;
+    --orange:  #e8621a;
+    --orange2: #f5892e;
+    --gold:    #c9973a;
+    --smoke:   #6a8060;
+    --cream:   #f2e8d0;
+    --blood:   #8b1a1a;
+    --green:   #2d6e3e;
+    --muted:   #3a5040;
+    --border:  rgba(232,98,26,0.22);
+    --borderl: rgba(232,98,26,0.09);
+    --safe:    env(safe-area-inset-bottom, 16px);
+  }
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+
+body {
+font-family: ‘Barlow’, sans-serif;
+background: var(–bg); color: var(–cream);
+min-height: 100dvh; overflow-x: hidden;
+padding-bottom: calc(20px + var(–safe));
+}
+
+body::before {
+content: ‘’; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 512 512’ xmlns=‘http://www.w3.org/2000/svg’%3E%3Cfilter id=‘n’%3E%3CfeTurbulence type=‘fractalNoise’ baseFrequency=‘0.8’ numOctaves=‘4’ stitchTiles=‘stitch’/%3E%3C/filter%3E%3Crect width=‘100%25’ height=‘100%25’ filter=‘url(%23n)’ opacity=‘0.04’/%3E%3C/svg%3E”);
+}
+
+/* ── LOGIN ──────────────────────────────────────────────────────────────── */
+#loginScreen {
+position: relative; z-index: 1;
+display: flex; align-items: center; justify-content: center;
+min-height: 100dvh; padding: 20px;
+background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(20,45,22,0.5) 0%, transparent 70%);
+}
+
+.login-box {
+width: 100%; max-width: 380px;
+background: var(–card); border: 1px solid var(–border);
+padding: 36px 24px 32px; position: relative;
+animation: fadeUp 0.5s ease both;
+}
+.login-box::before {
+content: ‘’; position: absolute; top: 0; left: 20%; right: 20%; height: 2px;
+background: linear-gradient(to right, transparent, var(–orange), transparent);
+}
+
+.login-logo { text-align: center; margin-bottom: 28px; }
+.login-circle {
+width: 72px; height: 72px; border-radius: 50%;
+border: 2px solid var(–orange);
+background: radial-gradient(circle at 50% 30%, #1e4025 0%, #080f09 80%);
+display: flex; align-items: center; justify-content: center;
+font-size: 32px; margin: 0 auto 12px;
+box-shadow: 0 0 24px rgba(232,98,26,0.18);
+}
+.login-title {
+font-family: ‘Fredoka One’, cursive;
+font-size: 26px; line-height: 1;
+color: var(–orange);
+-webkit-text-stroke: 1.5px #fff;
+paint-order: stroke fill;
+text-shadow: 0 2px 0 #7a3010;
+}
+.login-title.s2 { color: var(–orange2); font-size: 22px; }
+.login-sub {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 11px; letter-spacing: 4px; color: var(–smoke); margin-top: 6px;
+}
+
+/* ── FORM ELEMENTS ─────────────────────────────────────────────────────── */
+.field { margin-bottom: 16px; }
+.field label {
+display: block; font-size: 10px; text-transform: uppercase;
+letter-spacing: 3px; color: var(–orange); margin-bottom: 7px; font-weight: 500;
+}
+.field input, .form-group input, .form-group textarea, .form-group select {
+width: 100%; padding: 13px 14px;
+background: var(–deep); border: 1px solid var(–border);
+color: var(–cream); font-family: ‘Barlow’, sans-serif;
+font-size: 15px; outline: none; resize: vertical;
+transition: border-color 0.2s; letter-spacing: 0.3px;
+-webkit-appearance: none; border-radius: 0;
+}
+.field input:focus, .form-group input:focus,
+.form-group textarea:focus, .form-group select:focus { border-color: var(–orange); }
+
+/* ── BUTTONS ───────────────────────────────────────────────────────────── */
+.btn {
+display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+padding: 14px 20px; border: none;
+font-family: ‘Bebas Neue’, sans-serif; font-size: 16px; letter-spacing: 3px;
+cursor: pointer; transition: opacity 0.15s, transform 0.15s;
+touch-action: manipulation; -webkit-appearance: none; border-radius: 0;
+min-height: 48px;
+}
+.btn:active { opacity: 0.8; transform: scale(0.97); }
+.btn-orange  { background: linear-gradient(135deg,var(–orange),var(–orange2)); color:#fff; width:100%; margin-top:8px; box-shadow:0 4px 20px rgba(232,98,26,0.3); }
+.btn-success { background: var(–green); color: var(–cream); }
+.btn-danger  { background: var(–blood); color: var(–cream); }
+.btn-ghost   { background: transparent; color: var(–cream); border: 1px solid var(–border); }
+.btn-sm      { padding: 10px 16px; font-size: 13px; letter-spacing: 2px; min-height: 42px; }
+.btn-full    { width: 100%; }
+
+.error-msg { color: var(–blood); font-size: 12px; margin-top: 10px; text-align: center; min-height: 18px; letter-spacing: 1px; }
+
+/* ── ADMIN LAYOUT ──────────────────────────────────────────────────────── */
+#adminScreen { display: none; position: relative; z-index: 1; }
+
+.topbar {
+display: flex; align-items: center; justify-content: space-between;
+padding: 12px 16px;
+background: var(–card); border-bottom: 1px solid var(–border);
+position: sticky; top: 0; z-index: 10;
+}
+.topbar-logo {
+font-family: ‘Fredoka One’, cursive;
+font-size: 18px; color: var(–orange);
+-webkit-text-stroke: 1px rgba(255,255,255,0.4);
+text-shadow: 0 2px 0 #7a3010;
+}
+.topbar-logo sub {
+font-size: 11px; color: var(–smoke); letter-spacing: 2px;
+font-family: ‘Bebas Neue’, sans-serif; vertical-align: middle;
+margin-left: 6px; -webkit-text-stroke: 0;
+}
+
+/* ── BOTTOM NAV MOBILE ─────────────────────────────────────────────────── */
+.bottom-nav {
+position: fixed; bottom: 0; left: 0; right: 0;
+background: var(–card); border-top: 1px solid var(–border);
+display: flex; z-index: 20;
+padding-bottom: var(–safe);
+}
+.bnav-item {
+flex: 1; padding: 10px 4px 6px;
+text-align: center; cursor: pointer;
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 10px; letter-spacing: 1.5px;
+color: var(–muted); transition: color 0.2s;
+touch-action: manipulation;
+}
+.bnav-item.active { color: var(–orange); }
+.bnav-item .bnav-icon { font-size: 20px; display: block; margin-bottom: 2px; }
+
+/* Padding pour bottom nav */
+.admin-content {
+padding-bottom: calc(70px + var(–safe));
+}
+
+/* ── TAB SECTIONS ──────────────────────────────────────────────────────── */
+.admin-section { display: none; padding: 20px 14px; }
+.admin-section.active { display: block; animation: fadeUp 0.3s ease; }
+
+/* ── CARDS ─────────────────────────────────────────────────────────────── */
+.card {
+background: var(–card); border: 1px solid var(–borderl);
+border-top: 2px solid var(–orange);
+padding: 18px 14px; margin-bottom: 16px;
+}
+.card-title {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 15px; letter-spacing: 3px; color: var(–orange);
+margin-bottom: 16px; padding-bottom: 10px;
+border-bottom: 1px solid var(–borderl);
+}
+
+.form-grid { display: grid; gap: 12px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group label {
+font-size: 10px; text-transform: uppercase;
+letter-spacing: 3px; color: var(–orange); font-weight: 500;
+}
+
+/* ── PRODUCT LIST ──────────────────────────────────────────────────────── */
+.item-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+
+.list-item {
+background: var(–deep); border: 1px solid var(–borderl);
+border-left: 3px solid var(–orange);
+padding: 12px 14px;
+display: flex; align-items: center; gap: 12px;
+}
+
+.item-thumb {
+width: 48px; height: 48px; flex-shrink: 0;
+background: var(–card); border: 1px solid var(–borderl);
+display: flex; align-items: center; justify-content: center;
+font-size: 22px; overflow: hidden;
+}
+.item-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+.item-info { flex: 1; min-width: 0; }
+.item-name {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 15px; letter-spacing: 2px; color: var(–cream);
+white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.item-meta { font-size: 11px; color: var(–smoke); margin-top: 2px; }
+
+.
+item-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dot-ok  { background: #38c97a; box-shadow: 0 0 6px rgba(56,201,122,0.5); }
+.dot-out { background: var(–blood); }
+
+.item-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.item-btn {
+width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
+border: 1px solid var(–border); background: transparent;
+color: var(–cream); font-size: 14px; cursor: pointer;
+touch-action: manipulation; transition: background 0.15s;
+}
+.item-btn:active { background: rgba(232,98,26,0.15); }
+.item-btn.danger { border-color: rgba(139,26,26,0.4); color: #e05c5c; }
+
+/* Prix tags sur les produits */
+.price-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.price-tag {
+font-family: ‘Bebas Neue’, sans-serif; font-size: 11px; letter-spacing: 1px;
+padding: 2px 8px; background: rgba(232,98,26,0.08); border: 1px solid var(–borderl);
+color: var(–orange2);
+}
+
+/* ── ADD FORM ──────────────────────────────────────────────────────────── */
+.add-form {
+background: var(–deep); border: 1px solid var(–border);
+padding: 16px 14px; margin-top: 12px;
+display: none; animation: fadeUp 0.3s ease;
+}
+.add-form.open { display: block; }
+.add-form-title {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 13px; letter-spacing: 3px; color: var(–smoke); margin-bottom: 14px;
+}
+
+/* Prix editor */
+.prices-editor { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+.price-row {
+display: flex; gap: 6px; align-items: center;
+padding: 8px 10px; background: var(–card); border: 1px solid var(–borderl);
+}
+.price-row input {
+flex: 1; padding: 8px 10px; background: var(–deep);
+border: 1px solid var(–border); color: var(–cream);
+font-size: 14px; outline: none; min-width: 0;
+}
+.price-row input:focus { border-color: var(–orange); }
+.pr-label {
+font-size: 9px; letter-spacing: 2px; color: var(–smoke);
+flex-shrink: 0; text-transform: uppercase; font-weight: 500;
+}
+.pr-del {
+background: transparent; border: none; color: var(–blood);
+font-size: 18px; cursor: pointer; padding: 0 4px;
+touch-action: manipulation; min-width: 28px; text-align: center;
+}
+
+.btn-add-price {
+width: 100%; padding: 10px; margin-top: 4px;
+background: transparent; border: 1px dashed var(–border);
+color: var(–smoke); font-family: ‘Bebas Neue’, sans-serif;
+font-size: 12px; letter-spacing: 2px; cursor: pointer;
+touch-action: manipulation; transition: border-color 0.2s, color 0.2s;
+}
+.btn-add-price:active { border-color: var(–orange); color: var(–orange); }
+
+/* Image preview */
+.img-prev {
+width: 100%; height: 100px; background: var(–card);
+border: 1px solid var(–border); overflow: hidden;
+display: flex; align-items: center; justify-content: center;
+margin-top: 6px;
+}
+.img-prev img { width: 100%; height: 100%; object-fit: cover; display: none; }
+.img-prev .ph { font-size: 11px; color: var(–smoke); letter-spacing: 2px; text-transform: uppercase; }
+
+/* ── SOCIAL NETWORK LIST ───────────────────────────────────────────────── */
+.social-item { border-left-color: #1da1f2; }
+.social-item .item-thumb { font-size: 24px; }
+
+/* ── STATUS BAR ────────────────────────────────────────────────────────── */
+.status-bar {
+position: fixed; bottom: calc(60px + var(–safe)); right: 14px;
+background: var(–green); border: 1px solid rgba(56,201,122,0.3);
+color: var(–cream); padding: 12px 18px;
+font-family: ‘Bebas Neue’, sans-serif; font-size: 13px; letter-spacing: 2px;
+transform: translateY(80px); opacity: 0;
+transition: transform 0.35s cubic-bezier(.34,1.56,.64,1), opacity 0.3s;
+z-index: 999; pointer-events: none; max-width: calc(100vw - 28px);
+}
+.status-bar.show { transform: translateY(0); opacity: 1; }
+.status-bar.error { background: var(–blood); border-color: rgba(139,26,26,0.4); }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+</style>
+
+</head>
+<body>
+
+<!-- ══ LOGIN ══════════════════════════════════════════════════════════════════ -->
+
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-circle">🐒</div>
+<div class="login-title">OMERTA</div>
+      <div class="login-title s2">SOCIETY</div>
+      <div class="login-sub">◆ ESPACE ADMIN ◆</div>
+    </div>
+    <div class="field">
+      <label>Code d'accès</label>
+      <input type="password" id="pwdInput" placeholder="••••••••" inputmode="text"
+             onkeydown="if(event.key==='Enter')login()"/>
+    </div>
+    <button class="btn btn-orange" onclick="login()">◆ &nbsp; ENTRER</button>
+    <div class="error-msg" id="loginError"></div>
+  </div>
+</div>
+
+<!-- ══ ADMIN ══════════════════════════════════════════════════════════════════ -->
+
+<div id="adminScreen">
+
+  <div class="topbar">
+    <div class="topbar-logo">OMERTA<sub>ADMIN</sub></div>
+    <button class="btn btn-ghost btn-sm" onclick="logout()">QUITTER</button>
+  </div>
+
+  <div class="admin-content">
+<!-- ══ BOT ══════════════════════════════════════════════════════════ -->
+<div class="admin-section active" id="sec-bot">
+  <div class="card">
+    <div class="card-title">◆ MESSAGES DU BOT</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Message d'accueil</label>
+        <input type="text" id="bot_welcome" placeholder="Bienvenue dans la Society 🦅"/>
+      </div>
+      <div class="form-group">
+        <label>Titre du menu</label>
+        <input type="text" id="bot_menu_title" placeholder="Choisissez votre accès."/>
+      </div>
+      <div class="form-group">
+        <label>Contact Telegram</label>
+        <input type="text" id="bot_contact" placeholder="@votre_contact"/>
+      </div>
+      <div class="form-group">
+        <label>Bloc informations</label>
+        <textarea id="bot_info" rows="4" placeholder="🇲🇦 Maroc · 🇨🇴 Colombie · 🇺🇸 USA · 🇳🇱 Hollande&#10;Horaires : sur RDV&#10;Contact : @votre_contact"></textarea>
+      </div>
+    </div>
+    <div style="margin-top:16px">
+      <button class="btn btn-success btn-full" onclick="saveBot()">◆ &nbsp; ENREGISTRER</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">◆ BOUTIQUE</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Nom de la boutique</label>
+        <input type="text" id="shop_title" placeholder="OMERTA SOCIETY"/>
+      </div>
+      <div class="form-group">
+        <label>Sous-titre</label>
+        <input type="text" id="shop_subtitle" placeholder="La sélection exclusive"/>
+      </div>
+      <div class="form-group">
+        <label>Devise (€, $, £…)</label>
+        <input type="text" id="shop_currency" placeholder="€"/>
+      </div>
+    </div>
+    <div style="margin-top:16px">
+      <button class="btn btn-success btn-full" onclick="saveShopInfo()">◆ &nbsp; ENREGISTRER</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PRODUITS ══════════════════════════════════════════════════════ -->
+<div class="admin-section" id="sec-produits">
+  <div class="card">
+    <div class="card-title">
+      ◆ PRODUITS
+      <span id="productCount" style="font-size:12px;font-family:Barlow,sans-serif;letter-spacing:0;font-weight:300;color:var(--smoke)"></span>
+    </div>
+    <div class="item-list" id="productList"></div>
+    <button class="btn btn-ghost btn-sm" onclick="toggleForm('addProdForm')">+ &nbsp; NOUVEAU PRODUIT</button>
+
+    <div class="add-form" id="addProdForm">
+      <div class="add-form-title">NOUVEAU PRODUIT</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nom du produit</label>
+          <input type="text" id="p_name" placeholder="Ex : GOLD SELECTION"/>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 80px;gap:10px">
+          <div class="form-group">
+            <label>Description</label>
+            <textarea id="p_desc" rows="3" placeholder="Origine, qualité, caractéristiques…"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Emoji</label>
+            <input type="text" id="p_emoji" placeholder="🌿"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>URL de l'image produit</label>
+          <input type="url" id="p_img" placeholder="https://…/photo.
+jpg" oninput="previewImg(this.value,'p_prev')"/>
+          <div class="img-prev" id="p_prev">
+            <span class="ph">APERÇU</span>
+            <img id="p_prev_img" src="" alt=""/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Tarifs par quantité</label>
+          <div class="prices-editor" id="pricesEditor">
+            <div class="price-row">
+              <span class="pr-label">QTÉ</span>
+              <input type="text" class="qty-in" placeholder="5g"/>
+              <span class="pr-label">PRIX</span>
+              <input type="number" class="price-in" placeholder="40" step="0.01"/>
+              <button class="pr-del" onclick="delPriceRow(this)">✕</button>
+            </div>
+          </div>
+          <button class="btn-add-price" onclick="addPriceRow()">+ AJOUTER UNE QUANTITÉ</button>
+        </div>
+        <div class="form-group">
+          <label>Disponibilité</label>
+          <select id="p_avail">
+            <option value="true">✅ DISPONIBLE</option>
+            <option value="false">❌ ÉPUISÉ</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <button class="btn btn-orange btn-sm" onclick="addProduct()" style="width:auto;flex:1">◆ AJOUTER</button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleForm('addProdForm')">ANNULER</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ RÉSEAUX SOCIAUX ═══════════════════════════════════════════════ -->
+<div class="admin-section" id="sec-socials">
+  <div class="card">
+    <div class="card-title">
+      ◆ RÉSEAUX SOCIAUX
+      <span id="socialCount" style="font-size:12px;font-family:Barlow,sans-serif;letter-spacing:0;font-weight:300;color:var(--smoke)"></span>
+    </div>
+    <div class="item-list" id="socialList"></div>
+    <button class="btn btn-ghost btn-sm" onclick="toggleForm('addSocialForm')">+ &nbsp; NOUVEAU RÉSEAU</button>
+
+    <div class="add-form" id="addSocialForm">
+      <div class="add-form-title">NOUVEAU RÉSEAU SOCIAL</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Nom du réseau</label>
+          <input type="text" id="s_name" placeholder="Ex : Instagram, TikTok, Telegram…"/>
+        </div>
+        <div class="form-group">
+          <label>Lien URL (profil ou page)</label>
+          <input type="url" id="s_url" placeholder="https://instagram.com/moncompte"/>
+        </div>
+        <div class="form-group">
+          <label>Handle / @username (optionnel)</label>
+          <input type="text" id="s_handle" placeholder="@moncompte"/>
+        </div>
+        <div class="form-group">
+          <label>URL du logo/icône du réseau</label>
+          <input type="url" id="s_logo" placeholder="https://…/logo.png" oninput="previewImg(this.value,'s_prev')"/>
+          <div class="img-prev" id="s_prev">
+            <span class="ph">APERÇU LOGO</span>
+            <img id="s_prev_img" src="" alt=""/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Emoji (si pas de logo)</label>
+          <input type="text" id="s_emoji" placeholder="📸"/>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:16px">
+        <button class="btn btn-orange btn-sm" onclick="addSocial()" style="width:auto;flex:1">◆ AJOUTER</button>
+        <button class="btn btn-ghost btn-sm" onclick="toggleForm('addSocialForm')">ANNULER</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SÉCURITÉ ══════════════════════════════════════════════════════ -->
+<div class="admin-section" id="sec-securite">
+  <div class="card">
+    <div class="card-title">◆ CODE D'ACCÈS</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Nouveau code (min 6 car.)</label>
+        <input type="password" id="new_pwd" placeholder="••••••••"/>
+      </div>
+      <div class="form-group">
+        <label>Confirmer</label>
+        <input type="password" id="new_pwd2" placeholder="••••••••"/>
+      </div>
+    </div>
+    <div style="margin-top:16px">
+<button class="btn btn-danger btn-full" onclick="changePassword()">◆ &nbsp; CHANGER LE CODE</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">◆ SAUVEGARDER & DÉPLOYER</div>
+    <p style="font-size:13px;color:var(--smoke);line-height:1.7;margin-bottom:16px;font-weight:300">
+      Après chaque modification, exportez <strong style="color:var(--cream)">data.json</strong> et uploadez-le sur GitHub pour mettre à jour le bot et la boutique.
+    </p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-success btn-full" onclick="exportData()">◆ &nbsp; EXPORTER data.json</button>
+      <label class="btn btn-ghost btn-full" style="cursor:pointer">
+        ◆ &nbsp; IMPORTER data.json
+        <input type="file" accept=".json" onchange="importData(event)" style="display:none"/>
+      </label>
+    </div>
+    <div style="margin-top:16px;padding:14px;background:var(--deep);border:1px solid var(--borderl)">
+      <p style="font-size:10px;letter-spacing:1.5px;color:var(--smoke);line-height:1.9;text-transform:uppercase">
+        📌 Modifier → Exporter → Uploader sur GitHub → ✅ Mise à jour en ligne
+      </p>
+    </div>
+  </div>
+</div>
+
+  </div><!-- /.admin-content -->
+
+  <!-- BOTTOM NAV MOBILE -->
+
+  <div class="bottom-nav">
+    <div class="bnav-item active" onclick="showSection('bot',this)">
+      <span class="bnav-icon">🤖</span>BOT
+    </div>
+    <div class="bnav-item" onclick="showSection('produits',this)">
+      <span class="bnav-icon">📦</span>PRODUITS
+    </div>
+    <div class="bnav-item" onclick="showSection('socials',this)">
+      <span class="bnav-icon">📲</span>RÉSEAUX
+    </div>
+    <div class="bnav-item" onclick="showSection('securite',this)">
+      <span class="bnav-icon">🔒</span>SÉCURITÉ
+    </div>
+  </div>
+
+</div><!-- /#adminScreen -->
+
+<div class="status-bar" id="statusBar"></div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   DONNÉES
+══════════════════════════════════════════════════════ */
+let DATA = null;
+
+const DEFAULT = {
+  bot: {
+    welcome_message: "Bienvenue dans la Society 🦅 La loi du silence.",
+    menu_title: "Choisissez votre accès.",
+    contact_username: "@votre_contact",
+    info_text: "🇲🇦 Maroc · 🇨🇴 Colombie · 🇺🇸 USA · 🇳🇱 Hollande\nContact : @votre_contact\nAccès sur invitation uniquement."
+  },
+  shop: {
+    title: "OMERTA SOCIETY",
+    subtitle: "La sélection exclusive — Sur invitation",
+    currency: "€",
+    products: [
+      {
+        id: 1, name: "GOLD SELECTION", emoji: "🌿",
+        description: "Notre sélection premium, cultivée avec soin. Arômes intenses, qualité irréprochable.",
+        image_url: "",
+        prices: [{ qty:"5g",price:40},{qty:"10g",price:75},{qty:"20g",price:140},{qty:"50g",price:320}],
+        available: true
+      },
+      {
+        id: 2, name: "MOROCCAN HASH", emoji: "🟫",
+        description: "Importé directement du Rif marocain. Texture unique, puissance garantie.",
+        image_url: "",
+        prices: [{qty:"5g",price:35},{qty:"10g",price:65},{qty:"25g",price:150},{qty:"50g",price:280}],
+        available: true
+      }
+    ]
+  },
+  socials: [],
+  admin: { password: "admin1234" }
+};
+
+function loadData() {
+  const s = localStorage.getItem('omerta_final');
+  DATA = s ? JSON.parse(s) : JSON.parse(JSON.stringify(DEFAULT));
+  if (!DATA.socials) DATA.socials = [];
+}
+
+function saveData() {
+  localStorage.setItem('omerta_final', JSON.stringify(DATA));
+  showStatus('◆ ENREGISTRÉ');
+}
+
+/* ══════════════════════════════════════════════════════
+   LOGIN
+══════════════════════════════════════════════════════ */
+function login() {
+  loadData();
+  if (document.getElementById('pwdInput').value === DATA.admin.password) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminScreen').style.display = 'block';
+    renderAll();
+  } else {
+    document.getElementById('loginError').textContent = '◆ CODE INCORRECT';
+    document.getElementById('pwdInput').value = '';
+  }
+}
+function logout() {
+  document.getElementById('loginScreen').style.
+display = 'flex';
+  document.getElementById('adminScreen').style.display = 'none';
+  document.getElementById('pwdInput').value = '';
+  document.getElementById('loginError').textContent = '';
+}
+
+/* ══════════════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════════════ */
+function showSection(name, el) {
+  document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + name).classList.add('active');
+  el.classList.add('active');
+}
+
+function toggleForm(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+/* ══════════════════════════════════════════════════════
+   RENDER ALL
+══════════════════════════════════════════════════════ */
+function renderAll() {
+  document.getElementById('bot_welcome').value    = DATA.bot.welcome_message;
+  document.getElementById('bot_menu_title').value = DATA.bot.menu_title;
+  document.getElementById('bot_contact').value    = DATA.bot.contact_username;
+  document.getElementById('bot_info').value       = DATA.bot.info_text;
+  document.getElementById('shop_title').value     = DATA.shop.title;
+  document.getElementById('shop_subtitle').value  = DATA.shop.subtitle;
+  document.getElementById('shop_currency').value  = DATA.shop.currency;
+  renderProducts();
+  renderSocials();
+}
+
+/* ══════════════════════════════════════════════════════
+   PRODUITS
+══════════════════════════════════════════════════════ */
+function renderProducts() {
+  const list  = document.getElementById('productList');
+  const count = document.getElementById('productCount');
+  const n     = DATA.shop.products.length;
+  count.textContent =  (${n});
+
+  if (n === 0) {
+    list.innerHTML = '<div style="color:var(--smoke);font-size:13px;padding:8px 0">— Aucun produit —</div>';
+    return;
+  }
+
+  list.innerHTML = DATA.shop.products.map((p, i) => `
+    <div class="list-item">
+      <div class="item-thumb">
+        ${p.image_url ? <img src="${p.image_url}" onerror="this.outerHTML='${p.emoji}'"> : p.emoji}
+      </div>
+      <div class="item-info">
+        <div class="item-name">${p.name}</div>
+        <div class="price-tags">
+          ${(p.prices||[]).map(pr => `<div class="price-tag">${pr.qty}/${pr.price}${DATA.shop.currency}</div>`).join('')}
+        </div>
+      </div>
+      <div class="item-dot ${p.available ? 'dot-ok' : 'dot-out'}"></div>
+      <div class="item-actions">
+        <button class="item-btn" onclick="toggleAvail(${i})" title="${p.available?'Épuiser':'Remettre dispo'}">
+          ${p.available ? '🔴' : '🟢'}
+        </button>
+        <button class="item-btn danger" onclick="deleteItem('product',${i})">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addPriceRow() {
+  const editor = document.getElementById('pricesEditor');
+  const row = document.createElement('div');
+  row.className = 'price-row';
+  row.innerHTML = `
+    <span class="pr-label">QTÉ</span><input type="text" class="qty-in" placeholder="10g"/>
+    <span class="pr-label">PRIX</span><input type="number" class="price-in" placeholder="75" step="0.01"/>
+    <button class="pr-del" onclick="delPriceRow(this)">✕</button>
+  `;
+  editor.appendChild(row);
+}
+
+function delPriceRow(btn) {
+  const rows = document.querySelectorAll('#pricesEditor .price-row');
+  if (rows.length > 1) btn.closest('.price-row').remove();
+  else showStatus('◆ MINIMUM 1 TARIF', true);
+}
+
+function getPrices() {
+  return [...document.querySelectorAll('#pricesEditor .price-row')]
+    .map(r => ({ qty: r.querySelector('.qty-in').value.trim(), price: parseFloat(r.querySelector('.price-in').value) }))
+    .filter(p => p.qty && !isNaN(p.price));
+}
+
+function addProduct() {
+  const name   = document.getElementById('p_name').value.trim();
+  const prices = getPrices();
+  if (!name)           { showStatus('◆ NOM REQUIS', true); return; }
+  if (!prices.length)  { showStatus('◆ MIN 1 TARIF', true); return; }
+
+  const maxId = DATA.shop.products.reduce((m, p) => Math.max(m, p.id), 0);
+  DATA.shop.
+products.push({
+    id: maxId + 1, name,
+    emoji:       document.getElementById('p_emoji').value.trim() || '🌿',
+    description: document.getElementById('p_desc').value.trim() || '—',
+    image_url:   document.getElementById('p_img').value.trim(),
+    prices,
+    available:   document.getElementById('p_avail').value === 'true',
+  });
+  saveData(); renderProducts();
+  ['p_name','p_desc','p_emoji','p_img'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('pricesEditor').innerHTML = `
+    <div class="price-row">
+      <span class="pr-label">QTÉ</span><input type="text" class="qty-in" placeholder="5g"/>
+      <span class="pr-label">PRIX</span><input type="number" class="price-in" placeholder="40" step="0.01"/>
+      <button class="pr-del" onclick="delPriceRow(this)">✕</button>
+    </div>`;
+  document.getElementById('p_prev_img').style.display = 'none';
+  toggleForm('addProdForm');
+}
+
+function toggleAvail(i) {
+  DATA.shop.products[i].available = !DATA.shop.products[i].available;
+  saveData(); renderProducts();
+}
+
+/* ══════════════════════════════════════════════════════
+   RÉSEAUX SOCIAUX
+══════════════════════════════════════════════════════ */
+function renderSocials() {
+  const list  = document.getElementById('socialList');
+  const count = document.getElementById('socialCount');
+  const n     = DATA.socials.length;
+  count.textContent =  (${n});
+
+  if (n === 0) {
+    list.innerHTML = '<div style="color:var(--smoke);font-size:13px;padding:8px 0">— Aucun réseau social —</div>';
+    return;
+  }
+
+  list.innerHTML = DATA.socials.map((s, i) => `
+    <div class="list-item social-item">
+      <div class="item-thumb">
+        ${s.logo_url ? <img src="${s.logo_url}" onerror="this.outerHTML='${s.emoji||'📱'}'"> : (s.emoji || '📱')}
+      </div>
+      <div class="item-info">
+        <div class="item-name">${s.name}</div>
+        <div class="item-meta" style="word-break:break-all">${s.handle  s.url  ''}</div>
+      </div>
+      <div class="item-actions">
+        <button class="item-btn danger" onclick="deleteItem('social',${i})">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addSocial() {
+  const name = document.getElementById('s_name').value.trim();
+  const url  = document.getElementById('s_url').value.trim();
+  if (!name) { showStatus('◆ NOM REQUIS', true); return; }
+  if (!url)  { showStatus('◆ URL REQUISE', true); return; }
+
+  DATA.socials.push({
+    name,
+    url,
+    handle:   document.getElementById('s_handle').value.trim(),
+    logo_url: document.getElementById('s_logo').value.trim(),
+    emoji:    document.getElementById('s_emoji').value.trim() || '📱',
+  });
+  saveData(); renderSocials();
+  ['s_name','s_url','s_handle','s_logo','s_emoji'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('s_prev_img').style.display = 'none';
+  toggleForm('addSocialForm');
+}
+
+/* ══════════════════════════════════════════════════════
+   DELETE
+══════════════════════════════════════════════════════ */
+function deleteItem(type, i) {
+  const arr  = type === 'product' ? DATA.shop.products : DATA.socials;
+  const name = arr[i].name;
+  if (!confirm(`Supprimer "${name}" ?`)) return;
+  arr.splice(i, 1);
+  saveData();
+  if (type === 'product') renderProducts();
+  else renderSocials();
+}
+
+/* ══════════════════════════════════════════════════════
+   SAVE
+══════════════════════════════════════════════════════ */
+function saveBot() {
+  DATA.bot.welcome_message  = document.getElementById('bot_welcome').value;
+  DATA.bot.menu_title       = document.getElementById('bot_menu_title').value;
+  DATA.bot.contact_username = document.getElementById('bot_contact').value;
+  DATA.bot.info_text        = document.getElementById('bot_info').value;
+  saveData();
+}
+function saveShopInfo() {
+  DATA.shop.title    = document.getElementById('shop_title').value;
+  DATA.shop.subtitle = document.getElementById('shop_subtitle').value;
+  DATA.shop.currency = document.getElementById('shop_currency').value;
+  saveData();
+}
+
+/* ══════════════════════════════════════════════════════
+   IMAGE PREVIEW
+══════════════════════════════════════════════════════ */
+function previewImg(url, wrapId) {
+  const suffix = wrapId === 'p_prev' ? 'p_prev_img' : 's_prev_img';
+  const img    = document.getElementById(suffix);
+  if (url) { img.src = url; img.style.display = 'block'; img.onerror = () => img.style.display='none'; }
+  else img.style.display = 'none';
+}
+
+/* ══════════════════════════════════════════════════════
+   SÉCURITÉ
+══════════════════════════════════════════════════════ */
+function changePassword() {
+  const p1 = document.getElementById('new_pwd').value;
+  const p2 = document.getElementById('new_pwd2').value;
+  if (p1.length < 6) { showStatus('◆ MIN 6 CARACTÈRES', true); return; }
+  if (p1 !== p2)     { showStatus('◆ CODES DIFFÉRENTS', true); return; }
+  DATA.admin.password = p1;
+  saveData();
+  document.getElementById('new_pwd').value  = '';
+  document.getElementById('new_pwd2').value = '';
+}
+
+/* ══════════════════════════════════════════════════════
+   EXPORT / IMPORT
+══════════════════════════════════════════════════════ */
+function exportData() {
+  const blob = new Blob([JSON.stringify(DATA, null, 2)], { type: 'application/json' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = 'data.json';
+  a.click();
+  showStatus('◆ EXPORTÉ — UPLOADEZ SUR GITHUB');
+}
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      DATA = JSON.parse(ev.target.result);
+      if (!DATA.socials) DATA.socials = [];
+      localStorage.setItem('omerta_final', JSON.stringify(DATA));
+      renderAll();
+      showStatus('◆ DONNÉES IMPORTÉES');
+    } catch { showStatus('◆ FICHIER INVALIDE', true); }
+  };
+  r.readAsText(file);
+}
+
+/* ══════════════════════════════════════════════════════
+   STATUS BAR
+══════════════════════════════════════════════════════ */
+function showStatus(msg, err=false) {
+  const b = document.getElementById('statusBar');
+  b.textContent = msg;
+  b.className   = 'status-bar show' + (err ? ' error' : '');
+  setTimeout(() => b.classList.remove('show'), 3000);
+}
+</script>
+
+</body>
+</html>
+
